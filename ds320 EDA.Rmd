@@ -1,0 +1,200 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+
+df1 <- read.csv("C:/Users/Aryac/Downloads/stock_yfinance_data.csv")
+df2 <- read.csv("C:/Users/Aryac/Downloads/stock_tweets.csv")
+
+```
+
+
+```{r}
+head(df1)
+
+```
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+ggplot(df1, aes(x=Date, y=Close, group=1)) +
+  geom_line() +
+  labs(title="Closing Stock Prices of TSLA", x="Date", y="Closing Price") +
+  theme_minimal()
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Assuming your dataframe is named df1 and has a column named Stock.Name
+df1 %>%
+  pivot_longer(cols = c(Open, High, Low, Close, Adj.Close), names_to = "PriceType", values_to = "Price") %>%
+  ggplot(aes(x=PriceType, y=Stock.Name, fill=PriceType)) +
+  geom_boxplot(alpha=0.7) +
+  geom_text(aes(label=round(Price, 2)), position=position_dodge(width=0.8), hjust=0.5, vjust=-0.5, size=3, check_overlap = TRUE) +
+  labs(title="Distribution of Stock Prices", x="Stock Price Type", y="Stock Name") +
+  theme(axis.text.x = element_text(angle=45, hjust=1)) # Adjusting x-axis labels for readability
+
+
+```
+
+```{r}
+library(kableExtra)
+df3 <- read.csv("C:/Users/Aryac/Downloads/stock_data_cleaned.csv")
+h <- head(df3)
+kable(h)
+```
+
+
+
+```{r}
+
+# Convert Date to a Date object and ensure data is sorted
+library(ggplot2)
+library(dplyr)
+
+# Assuming your CSV file is named 'stock_data_cleaned.csv'
+stock_data <- read.csv("C:/Users/Aryac/Downloads/stock_data_cleaned.csv", stringsAsFactors = FALSE)
+
+
+```
+
+
+```{r}
+stock_data$Date <- as.Date(stock_data$Date, format = "%d-%m-%Y")
+tesla_data <- filter(stock_data, Stock.Name == "TSLA")
+
+```
+
+```{r}
+ggplot(tesla_data, aes(x = Date)) +
+    geom_line(aes(y = Open, color = "Open")) +
+    geom_line(aes(y = High, color = "High")) +
+    geom_line(aes(y = Low, color = "Low")) +
+    geom_line(aes(y = Close, color = "Close")) +
+    labs(title = "TSLA Stock Prices Over Time", y = "Price") +
+    theme_minimal()
+
+```
+
+
+```{r}
+ggplot(tesla_data, aes(x = Date, y = Volume)) +
+    geom_line(color = "green") +
+    labs(title = "TSLA Trading Volume Over Time", y = "Volume") +
+    theme_minimal()
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)
+tesla_corr_data <- select(tesla_data, Open, High, Low, Close, Adj.Close, Volume, 
+                          Mean_Sentiment_Score, Median_Sentiment_Score, Total_Sentiment_Score)
+correlation_matrix <- cor(tesla_corr_data, use = "complete.obs")
+
+corr_melted <- melt(correlation_matrix)
+
+ggplot(corr_melted, aes(Var1, Var2, fill = value)) +
+    geom_tile(color = "white") +
+    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                         midpoint = 0, limit = c(-1,1), space = "Lab", 
+                         name="Pearson\nCorrelation") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 12, hjust = 1),
+          axis.text.y = element_text(size = 12),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank()) +
+    coord_fixed()
+
+
+```
+
+
+```{r}
+ggplot(tesla_data, aes(x = Mean_Sentiment_Score)) +
+    geom_histogram(bins = 30, fill = "blue", color = "black", alpha = 0.7) +
+    labs(title = "Distribution of Mean Sentiment Scores for TSLA", x = "Mean Sentiment Score", y = "Frequency") +
+    theme_minimal()
+
+
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Assuming you've already loaded and pre-processed your data as 'stock_data'
+stock_data$Date <- as.Date(stock_data$Date, format = "%d-%m-%Y")
+
+# Filter for a specific stock, e.g., TSLA
+tesla_data <- filter(stock_data, Stock.Name == "TSLA")
+
+# Plotting stock closing price and mean sentiment score over time
+ggplot() +
+    geom_line(data = tesla_data, aes(x = Date, y = Close, color = "Close Price")) +
+    geom_line(data = tesla_data, aes(x = Date, y = Mean_Sentiment_Score * 100, color = "Mean Sentiment Score")) +
+    labs(title = "TSLA Closing Price and Mean Sentiment Score Over Time", y = "Value") +
+    scale_color_manual(values = c("Close Price" = "blue", "Mean Sentiment Score" = "red")) +
+    theme_minimal()
+
+
+
+```
+
+```{r}
+# Calculating correlation
+correlation_result <- cor.test(tesla_data$Close, tesla_data$Mean_Sentiment_Score, use = "complete.obs")
+
+# Displaying the correlation coefficient and p-value
+print(paste("Correlation coefficient:", correlation_result$estimate))
+print(paste("P-value:", correlation_result$p.value))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
